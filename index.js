@@ -5,14 +5,13 @@ import pg from "pg";
 const app = express();
 const port = 3000;
 
-// Create a new database client using the DATABASE_URL environment variable
 const db = new pg.Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Ensure SSL is correctly configured
-  },
+  user: "postgres",
+  host: "localhost",
+  database: "permalist",
+  password: "123456",
+  port: 5432,
 });
-
 db.connect();
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,6 +38,7 @@ app.get("/", async (req, res) => {
 
 app.post("/add", async (req, res) => {
   const item = req.body.newItem;
+  // items.push({title: item});
   try {
     await db.query("INSERT INTO items (title) VALUES ($1)", [item]);
     res.redirect("/");
@@ -52,7 +52,7 @@ app.post("/edit", async (req, res) => {
   const id = req.body.updatedItemId;
 
   try {
-    await db.query("UPDATE items SET title = $1 WHERE id = $2", [item, id]);
+    await db.query("UPDATE items SET title = ($1) WHERE id = $2", [item, id]);
     res.redirect("/");
   } catch (err) {
     console.log(err);
